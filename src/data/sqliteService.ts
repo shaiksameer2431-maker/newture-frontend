@@ -52,9 +52,21 @@ const TABLES = {
 export async function checkConnection(): Promise<boolean> {
   try {
     const res = await apiFetch('/api/health');
-    if (!res.ok) return false;
-    const data = await res.json();
-    return data.status === 'ok';
+    if (res.ok) {
+      const data = await res.json().catch(() => null);
+      if (data && (data.status === 'ok' || data.status === 'degraded' || data.status === 'online' || data.database)) {
+        return true;
+      }
+    }
+    // Fallback probe to root endpoint
+    const rootRes = await apiFetch('/');
+    if (rootRes.ok) {
+      const rootData = await rootRes.json().catch(() => null);
+      if (rootData && (rootData.status === 'online' || rootData.database)) {
+        return true;
+      }
+    }
+    return false;
   } catch (error) {
     console.error("Database connection check failed:", error);
     return false;
