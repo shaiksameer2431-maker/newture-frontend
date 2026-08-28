@@ -229,9 +229,9 @@ export default function App() {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
         <div className="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-6"></div>
-        <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">Connecting to Database</h1>
+        <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">Connecting to Backend & Database</h1>
         <p className="text-slate-400 text-sm max-w-xs leading-relaxed">
-          Establishing a secure link to your local SQLite database...
+          Establishing a secure link to the NEXA server...
         </p>
       </div>
     );
@@ -247,9 +247,9 @@ export default function App() {
         <div className="w-20 h-20 bg-red-500/10 rounded-3xl flex items-center justify-center mb-8 border border-red-500/20">
           <ExternalLink className="w-10 h-10 text-red-500" />
         </div>
-        <h1 className="text-3xl font-bold text-white mb-4 tracking-tight">Connection Failed</h1>
+        <h1 className="text-3xl font-bold text-white mb-4 tracking-tight">Connection Error</h1>
         <p className="text-slate-400 text-base max-w-md mb-8 leading-relaxed">
-          We couldn't connect to the local database. Make sure the server is running with <span className="font-mono text-red-400">npm run dev</span>.
+          Unable to reach the NEXA backend. Please check your connection and try again.
         </p>
         <button 
           onClick={() => window.location.reload()}
