@@ -49,9 +49,24 @@ const TABLES = {
   STUDENTS: 'students'
 };
 
+const HEALTH_CHECK_TIMEOUT_MS = 15_000;
+
+async function fetchWithTimeout(input: string, timeoutMs = HEALTH_CHECK_TIMEOUT_MS): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await apiFetch(input, { signal: controller.signal });
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
+
 export async function checkConnection(): Promise<boolean> {
   try {
-    const res = await apiFetch('/api/health');
+    // A network request can remain pending indefinitely in a browser.  Keep
+    // the startup screen recoverable when a cold service or network stalls.
+    const res = await fetchWithTimeout('/api/health');
     if (res.ok) {
       const data = await res.json().catch(() => null);
       if (data && (data.status === 'ok' || data.status === 'degraded' || data.status === 'online' || data.database)) {
@@ -59,7 +74,7 @@ export async function checkConnection(): Promise<boolean> {
       }
     }
     // Fallback probe to root endpoint
-    const rootRes = await apiFetch('/');
+    const rootRes = await fetchWithTimeout('/');
     if (rootRes.ok) {
       const rootData = await rootRes.json().catch(() => null);
       if (rootData && (rootData.status === 'online' || rootData.database)) {
