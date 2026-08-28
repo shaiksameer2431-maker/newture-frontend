@@ -1,0 +1,41 @@
+{
+  "name": "necn-nexa-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=18 <=22"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "setup": "npm install --no-audit --no-fund",
+    "predev": "npm run setup",
+    "prebuild": "npm run setup"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.29.8",
+    "@tailwindcss/typography": "^0.5.20",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "necn-nexa-frontend": "file:",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.14",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^5.0.4",
+    "tailwindcss": "^4.1.14",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.3"
+  }
+}
