@@ -95,12 +95,14 @@ export async function fetchCollection<T>(collectionName: string): Promise<T[]> {
 
   try {
     const res = await apiFetch(endpoint);
-    if (res.ok && res.headers.get('content-type')?.includes('json')) {
-      const data = await res.json();
-      return (data || []).map((item: any) => mapFromSnakeCase(item) as T);
+    if (res.ok) {
+      const data = await res.json().catch(() => null);
+      if (Array.isArray(data)) {
+        return data.map((item: any) => mapFromSnakeCase(item) as T);
+      }
     }
   } catch (fetchErr: any) {
-    console.warn(`[FETCH] Failed to fetch ${endpoint}:`, fetchErr.message);
+    console.warn(`[FETCH] Failed to fetch ${endpoint}:`, fetchErr?.message || fetchErr);
   }
   return [];
 }
