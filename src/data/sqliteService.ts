@@ -49,7 +49,7 @@ const TABLES = {
   STUDENTS: 'students'
 };
 
-const HEALTH_CHECK_TIMEOUT_MS = 15_000;
+const HEALTH_CHECK_TIMEOUT_MS = 60_000;
 
 async function fetchWithTimeout(input: string, timeoutMs = HEALTH_CHECK_TIMEOUT_MS): Promise<Response> {
   const controller = new AbortController();
@@ -62,30 +62,37 @@ async function fetchWithTimeout(input: string, timeoutMs = HEALTH_CHECK_TIMEOUT_
   }
 }
 
-export async function checkConnection(): Promise<boolean> {
-  try {
-    // A network request can remain pending indefinitely in a browser.  Keep
-    // the startup screen recoverable when a cold service or network stalls.
-    const res = await fetchWithTimeout('/api/health');
-    if (res.ok) {
-      const data = await res.json().catch(() => null);
-      if (data && (data.status === 'ok' || data.status === 'degraded' || data.status === 'online' || data.database)) {
-        return true;
-      }
+export async function checkConnection(onProgress?: (message: string) => void): Promise<boolean> {
+  const maxAttempts = 3;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    if (attempt > 1 && onProgress) {
+      onProgress(`Waking backend server (cold-start attempt ${attempt}/${maxAttempts})...`);
     }
-    // Fallback probe to root endpoint
-    const rootRes = await fetchWithTimeout('/');
-    if (rootRes.ok) {
-      const rootData = await rootRes.json().catch(() => null);
-      if (rootData && (rootData.status === 'online' || rootData.database)) {
-        return true;
+    try {
+      const res = await fetchWithTimeout('/api/health');
+      if (res.ok) {
+        const data = await res.json().catch(() => null);
+        if (data && (data.status === 'ok' || data.status === 'degraded' || data.status === 'online' || data.database)) {
+          return true;
+        }
       }
+      // Fallback probe to root endpoint
+      const rootRes = await fetchWithTimeout('/');
+      if (rootRes.ok) {
+        const rootData = await rootRes.json().catch(() => null);
+        if (rootData && (rootData.status === 'online' || rootData.database)) {
+          return true;
+        }
+      }
+    } catch (error) {
+      console.warn(`Connection check attempt ${attempt}/${maxAttempts} failed or timed out:`, error);
     }
-    return false;
-  } catch (error) {
-    console.error("Database connection check failed:", error);
-    return false;
+
+    if (attempt < maxAttempts) {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
   }
+  return false;
 }
 
 export async function fetchCollection<T>(collectionName: string): Promise<T[]> {

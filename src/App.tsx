@@ -33,6 +33,7 @@ export default function App() {
 
   // Connection Status
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'error' | 'missing_config'>('connecting');
+  const [connectingMessage, setConnectingMessage] = useState<string>('Establishing a secure link to the NEXA server...');
   const [configChecked, setConfigChecked] = useState(false);
 
   // Database States
@@ -47,7 +48,9 @@ export default function App() {
   // Load state on startup & listen to query params / keyboard backdoor
   useEffect(() => {
     const checkDatabase = async () => {
-      const isConnected = await checkConnection();
+      const isConnected = await checkConnection((msg) => {
+        if (msg) setConnectingMessage(msg);
+      });
       if (isConnected) {
         setConnectionStatus('connected');
         // NOTE: We intentionally do NOT auto-seed here anymore.
@@ -230,8 +233,8 @@ export default function App() {
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
         <div className="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-6"></div>
         <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">Connecting to Backend & Database</h1>
-        <p className="text-slate-400 text-sm max-w-xs leading-relaxed">
-          Establishing a secure link to the NEXA server...
+        <p className="text-slate-400 text-sm max-w-sm leading-relaxed">
+          {connectingMessage}
         </p>
       </div>
     );
