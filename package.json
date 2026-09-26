@@ -2,6 +2,7 @@
   "name": "necn-nexa-frontend",
   "private": true,
   "version": "1.0.0",
+  "author": "Narayana Engineering College, Nellore",
   "type": "module",
   "engines": {
     "node": ">=18 <=22"

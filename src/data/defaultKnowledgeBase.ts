@@ -280,5 +280,16 @@ export const defaultRules: Rule[] = [
     relatedDepartment: 'ADMIN',
     priority: 4,
     status: 'Active',
+  },
+  {
+    id: 'R_CREATOR',
+    category: 'Administration',
+    question: 'Who created or designed this website and NEXA AI assistant?',
+    keywords: 'who created,who designed,who built,who made,creator,developer,author,designer,crafted by,project lead',
+    synonyms: 'creator of nexa,developer of this website,who coded this,project lead',
+    answer: 'The Narayana NEXA AI Web Portal and Conversational Answer Engine was developed for Narayana Engineering College, Nellore.',
+    relatedDepartment: 'ADMIN',
+    priority: 1,
+    status: 'Active',
   }
 ];

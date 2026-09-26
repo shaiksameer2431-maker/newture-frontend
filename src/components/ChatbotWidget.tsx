@@ -25,6 +25,8 @@ import { RichResponseRenderer } from './RichResponseRenderer';
 import { RobotLogo } from './RobotLogo';
 import { apiFetch } from '../lib/api';
 import TicketForm from './TicketForm';
+import { AttributionMark } from './attribution/AttributionMark';
+import { useAttribution } from './attribution/useAttribution';
 
 interface ChatbotWidgetProps {
   rules: Rule[];
@@ -348,6 +350,7 @@ export default function ChatbotWidget({
   
   // Track last unanswered query for ticket form pre-fill
   const [lastUnansweredQuery, setLastUnansweredQuery] = useState<string>('');
+  const [showNoAnswerPopup, setShowNoAnswerPopup] = useState<boolean>(false);
 
   const startScrollDrag = (axis: 'x' | 'y') => (event: React.PointerEvent<HTMLDivElement>) => {
     // Touch devices retain their native swipe behaviour. This adds a familiar
@@ -585,13 +588,12 @@ export default function ChatbotWidget({
       ticketDetails: "Ticket Details",
       unassigned: "Unassigned",
       resolved: "Resolved",
-      openStatus: "Open / In Queue",
       replyLabel: "Counselor Reply",
-      noticesTitle: "Narayana NEXA | College Notice Board",
+      noticesTitle: "NECN NEXA AI Assistant | College Notice Board",
       noticesIntro: "Real-time notice board and administrative circulars synced from the college register. Stay updated with upcoming schedules, placement drives, and examination deadlines.",
       noNotices: "No active notices posted on the board.",
-      chatHeading: "Narayana NEXA",
-      chatSubheading: "Official AI Admissions & Counseling Helpdesk",
+      chatHeading: "NECN NEXA AI Assistant",
+      chatSubheading: "Narayana Engineering College, Nellore (Autonomous)",
       footerCopyright: "Narayana Educational Institutions",
       suggestedTopicsHeader: "Suggested Topics:"
     },
@@ -656,11 +658,11 @@ export default function ChatbotWidget({
       resolved: "हल हो गया",
       openStatus: "खुला / कतार में",
       replyLabel: "सलाहकार का जवाब",
-      noticesTitle: "नारायणा नेक्సా | कॉलेज नोटिस बोर्ड",
+      noticesTitle: "NECN AI सहायक | कॉलेज नोटिस बोर्ड",
       noticesIntro: "कॉलेज रजिस्टर से सिंक किए गए वास्तविक समय के नोटिस बोर्ड और प्रशासनिक परिपत्र। आगामी कार्यक्रमों, प्लेसमेंट ड्राइव और परीक्षा की समय सीमा से अपडेट रहें।",
       noNotices: "बोर्ड पर कोई सक्रिय नोटिस नहीं है।",
-      chatHeading: "नारायणा नेक्सा",
-      chatSubheading: "आधिकारिक एआई प्रवेश और परामर्श सहायता डेस्क",
+      chatHeading: "NECN AI सहायक",
+      chatSubheading: "नारायणा इंजीनियरिंग कॉलेज, नेल्लोर (स्वायत्त)",
       footerCopyright: "नारायणा शैक्षणिक संस्थान",
       suggestedTopicsHeader: "सुझाए गए विषय:"
     },
@@ -725,11 +727,11 @@ export default function ChatbotWidget({
       resolved: "పరిష్కరించబడింది",
       openStatus: "ఓపెన్ / క్యూలో ఉంది",
       replyLabel: "సలహాదారు సమాధానం",
-      noticesTitle: "నారాయణ NEXA | కాలేజీ నోటీసు బోర్డు",
+      noticesTitle: "NECN AI అసిస్టెంట్ | కాలేజీ నోటీసు బోర్డు",
       noticesIntro: "కళాశాల రిజిస్టర్ నుండి సమకాలీకరించబడిన నిజ-సమయ నోటీసు బోర్డు మరియు పరిపాలనా సర్క్యులర్లు. రాబోయే షెడ్యూల్‌లు, ప్లేస్‌మెంట్ డ్రైవ్‌లు మరియు పరీక్షల గడువులతో అప్‌డేట్ అవ్వండి.",
       noNotices: "బోర్డుపై ఎటువంటి సక్రియ నోటీసులు లేవు.",
-      chatHeading: "నారాయణ నెక్సా",
-      chatSubheading: "అధికారిక AI అడ్మిషన్ల & కౌన్సిలింగ్ హెల్ప్‌డెస్క్",
+      chatHeading: "NECN AI అసిస్టెంట్",
+      chatSubheading: "నారాయణ ఇంజనీరింగ్ కాలేజ్, నెల్లూరు (అటానమస్)",
       footerCopyright: "నారాయణ విద్యా సంస్థలు",
       suggestedTopicsHeader: "సూచించబడిన అంశాలు:"
     }
@@ -880,16 +882,15 @@ export default function ChatbotWidget({
   // Quick reply buttons suited for a professional college/admissions chatbot
   const getDynamicQuickReplies = () => {
     const base = [
-      'Admissions',
-      'Placements',
-      'Fee Structure',
-      'Courses',
-      'Hostel',
-      'Transport',
-      'Scholarships',
-      'Departments',
-      'CSE HOD',
-      'My Attendance'
+      '🎓 Admissions 2024-25',
+      '📚 R20 Regulations',
+      '💼 Placements',
+      '💰 Fee Structure',
+      '🏛️ Hostels & Campus',
+      '👥 CSE Department',
+      '🚌 Transport Details',
+      '🏆 NAAC & Autonomous Status',
+      '🎫 Raise Support Ticket'
     ];
 
     return base;
@@ -941,12 +942,12 @@ export default function ChatbotWidget({
   // Welcome configuration helpers
   const getWelcomeText = () => {
     if (language === 'hi') {
-      return "👋 नारायणा नेक्सा में आपका स्वागत है\nनारायणा इंजीनियरिंग कॉलेज का आधिकारिक डिजिटल सहायक।";
+      return "👋 **NECN AI सहायक में आपका स्वागत है**\nनारायणा इंजीनियरिंग कॉलेज, नेल्लोर का आधिकारिक AI ज्ञान सहायक।\n\nप्रवेश, शैक्षणिक विनियम (R20), विभाग, शुल्क संरचना, प्लेसमेंट या परिसर सुविधाओं के बारे में कोई भी प्रश्न पूछें।";
     }
     if (language === 'te') {
-      return "👋 నారాయణ నెక్సాకు స్వాగతం\nనారాయణ ఇంజనీరింగ్ కాలేజ్ అధికారిక డిజిటల్ అసిస్టెంట్.";
+      return "👋 **NECN AI అసిస్టెంట్‌కు స్వాగతం**\nనారాయణ ఇంజనీరింగ్ కాలేజ్, నెల్లూరు అధికారిక AI నాలెడ్జ్ అసిస్టెంట్.\n\nఅడ్మిషన్లు, అకడమిక్ నిబంధనలు (R20), విభాగాలు, ఫీజుల వివరాలు, ప్లేస్‌మెంట్‌లు లేదా క్యాంపస్ వసతుల గురించి ఏదైనా ప్రశ్న అడగండి.";
     }
-    return "👋 Welcome to Narayana NEXA\nThe Official Digital Assistant of Narayana Engineering College.";
+    return "👋 **Welcome to NECN NEXA AI Assistant**\nOfficial Conversational Intelligence for **Narayana Engineering College, Nellore** (Autonomous).\n\nAsk any question regarding admissions, academic regulations (R20), departments (CSE, ECE, EEE, ME, CE, MCA, MBA), fee structures, placement records, hostel facilities, or campus life.";
   };
 
   const getClearedText = () => {
@@ -962,36 +963,66 @@ export default function ChatbotWidget({
   const getSuggestions = () => {
     if (language === 'hi') {
       return [
-        'प्रवेश प्रक्रिया क्या है?',
-        'बी.टेक के लिए शुल्क संरचना क्या है?',
-        'सीएसई विभाग के अध्यक्ष कौन हैं?',
-        'प्लेसमेंट आँकड़े क्या हैं?'
+        '🎓 प्रवेश प्रक्रिया और पात्रता क्या है?',
+        '📚 R20 शैक्षणिक विनियम और ग्रेडिंग',
+        '💼 प्लेसमेंट आँकड़े और शीर्ष कंपनियाँ',
+        '💰 बी.टेक और पीजी शुल्क संरचना',
+        '🏛️ छात्रावास और परिसर सुविधाएं',
+        '👥 सीएसई विभाग और संकाय'
       ];
     }
     if (language === 'te') {
       return [
-        'అడ్మిషన్ల ప్రక్రియ ఏమిటి?',
-        'బి.టెక్ ఫీజుల వివరాలు ఏమిటి?',
-        'CSE హెచ్‌ఓడీ ఎవరు?',
-        'ప్లేస్‌మెంట్ గణాంకాలు ఏమిటి?'
+        '🎓 అడ్మిషన్ల ప్రక్రియ & అర్హత ఏమిటి?',
+        '📚 R20 అకడమిక్ నిబంధనలు & గ్రేడింగ్',
+        '💼 ప్లేస్‌మెంట్ గణాంకాలు & ప్రముఖ కంపెనీలు',
+        '💰 బి.టెక్ & పీజీ ఫీజుల వివరాలు',
+        '🏛️ హాస్టల్ & క్యాంపస్ వసతులు',
+        '👥 CSE విభాగం & అధ్యాపకులు'
       ];
     }
     return [
-      'What is the admission process?',
-      'What is the fee structure for B.Tech?',
-      'Who is CSE HOD?',
-      'What are the placement statistics?'
+      '🎓 Admissions Process & Eligibility',
+      '📚 R20 Academic Regulations & Grading',
+      '💼 Placement Statistics & Top Recruiters',
+      '💰 B.Tech & PG Fee Structure',
+      '🏛️ Hostel & Campus Facilities',
+      '👥 CSE Department & Faculty'
     ];
   };
 
-  const welcomeMessage = "👋 Welcome to Narayana NEXA\nThe Official Digital Assistant of Narayana Engineering College.";
+  const { attribution, isVerified } = useAttribution();
+
+  const welcomeMessage = isVerified && attribution
+    ? `👋 **Welcome to NECN NEXA AI Assistant**\nOfficial Conversational Intelligence for **Narayana Engineering College, Nellore** (Autonomous).\n*Crafted & Engineered by **${attribution.displayName || attribution.name}** (Roll No: **${attribution.rollNo}**)*\n\nAsk any question regarding admissions, academic regulations (R20), departments (CSE, ECE, EEE, ME, CE, MCA, MBA), fee structures, placement records, hostel facilities, or campus life.`
+    : `👋 **Welcome to NECN NEXA AI Assistant**\nOfficial Conversational Intelligence for **Narayana Engineering College, Nellore** (Autonomous).\n\nAsk any question regarding admissions, academic regulations (R20), departments (CSE, ECE, EEE, ME, CE, MCA, MBA), fee structures, placement records, hostel facilities, or campus life.`;
   const defaultSuggestions = [
-    'Where is the college located?',
-    'What courses are offered?',
-    'What is the admission process?',
-    'Who can I contact for admissions?',
-    'What are the college working hours?'
+    '🎓 Admissions Process & Eligibility',
+    '📚 R20 Academic Regulations & Grading',
+    '💼 Placement Statistics & Top Recruiters',
+    '💰 B.Tech & PG Fee Structure',
+    '🏛️ Hostel & Campus Facilities',
+    '👥 CSE Department & Faculty'
   ];
+
+  const [currentSuggestions, setCurrentSuggestions] = useState<string[]>(defaultSuggestions);
+
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      try {
+        const res = await apiFetch('/api/suggestions');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data.suggestions) && data.suggestions.length > 0) {
+            setCurrentSuggestions(data.suggestions);
+          }
+        }
+      } catch (err) {
+        console.warn('[SUGGESTIONS] Failed to fetch dynamic suggestions:', err);
+      }
+    };
+    fetchSuggestions();
+  }, []);
 
   // Translation states for active chat history
   const [translatedMessages, setTranslatedMessages] = useState<Record<string, string>>({});
@@ -1212,7 +1243,7 @@ export default function ChatbotWidget({
                 sender: 'bot',
                 text: getClearedText(),
                 timestamp: time,
-                suggestedQuestions: defaultSuggestions
+                suggestedQuestions: currentSuggestions
               }]);
             }, 100);
           }
@@ -1251,7 +1282,7 @@ export default function ChatbotWidget({
         sender: 'bot',
         text: welcomeMessage,
         timestamp: time,
-        suggestedQuestions: defaultSuggestions
+        suggestedQuestions: currentSuggestions
       }
     ]);
   };
@@ -1266,7 +1297,7 @@ export default function ChatbotWidget({
           sender: 'bot',
           text: getClearedText(),
           timestamp: time,
-          suggestedQuestions: defaultSuggestions
+          suggestedQuestions: currentSuggestions
         }
       ]);
     }, 100);
@@ -1520,12 +1551,33 @@ export default function ChatbotWidget({
     setMessages(prev => [...prev, userMsg]);
     setInputText('');
     setIsTyping(true);
+    setShowNoAnswerPopup(false);
     userJustAskedRef.current = true;
+
+    const isOpenTicketIntent = /\b(open\s+(?:a\s+)?ticket|create\s+(?:a\s+)?ticket|raise\s+(?:a\s+)?ticket|need\s+to\s+open\s+(?:a\s+)?ticket|submit\s+(?:a\s+)?ticket|new\s+ticket)\b/i.test(queryLower) || queryLower === 'ticket' || queryLower === 'support ticket' || queryLower === 'open ticket';
+
+    if (isOpenTicketIntent) {
+      setLastUnansweredQuery(text);
+      setIsTyping(false);
+      setShowNoAnswerPopup(false);
+      const botTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setMessages(prev => [...prev, {
+        id: `msg-${Date.now()}-bot`,
+        sender: 'bot',
+        text: "I've opened the **Support Ticket Form** for you! 🎫\n\nPlease fill in your details and question below, and our administration team will review and respond to you directly.",
+        timestamp: botTime,
+        suggestedQuestions: ['View Main FAQs']
+      }]);
+      setActiveTab('ticketForm');
+      playNotificationSound('receive');
+      return;
+    }
 
     // Always use the backend authoritative search pipeline. Frontend local matching has been disabled
     // to enforce a single source of truth and strict selection rules.
     try {
-      const payload = { message: text, language };
+      const historyPayload = messages.slice(-6).map(m => ({ sender: m.sender, text: m.text }));
+      const payload = { message: text, language, chatHistory: historyPayload };
       const resp = await apiFetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1538,12 +1590,17 @@ export default function ChatbotWidget({
 
       if (!resp.ok) {
         setIsTyping(false);
+        setLastUnansweredQuery(text);
+        setShowNoAnswerPopup(true);
         setMessages(prev => [...prev, {
           id: `msg-${Date.now()}-bot`,
           sender: 'bot',
           text: fallbackText,
           timestamp: botTime,
-          suggestedQuestions: ['Raise Support Ticket']
+          suggestOpenTicket: true,
+          isNoVerifiedWarning: true,
+          unansweredQuery: text,
+          suggestedQuestions: ['🎫 Open Support Ticket Form', 'View Main FAQs']
         }]);
         playNotificationSound('receive');
         return;
@@ -1564,12 +1621,22 @@ export default function ChatbotWidget({
         sources: data.sources || (data.sourceUrl ? [{ title: data.sourcePage || 'NECN Website', url: data.sourceUrl }] : [])
       };
 
-      if (data.isNoVerifiedWarning || data.suggestOpenTicket) {
-        // Update the fallback message to show both chips
-        botResponse.text = "I couldn't find reliable information for your question in our current knowledge base. If you'd like, you can create a Support Ticket and a college administrator will review your request personally.";
-        botResponse.suggestedQuestions = ['🎫 Open Support Ticket Form', 'View Main FAQs'];
-        // Store the unanswered query for pre-filling the form
+      const isUnverified = Boolean(
+        data.isNoVerifiedWarning ||
+        data.suggestOpenTicket ||
+        data.status === 'NOT_FOUND' ||
+        (!data.text && data.suggestOpenTicket)
+      );
+
+      if (isUnverified) {
+        botResponse.suggestOpenTicket = true;
+        botResponse.isNoVerifiedWarning = true;
+        botResponse.unansweredQuery = text;
         setLastUnansweredQuery(text);
+        setShowNoAnswerPopup(true);
+        if (!botResponse.suggestedQuestions?.includes('🎫 Open Support Ticket Form')) {
+          botResponse.suggestedQuestions = ['🎫 Open Support Ticket Form', 'View Main FAQs'];
+        }
       }
 
       setMessages(prev => [...prev, botResponse]);
@@ -1584,18 +1651,23 @@ export default function ChatbotWidget({
         matchedQuestion: data.matchedQuestion || null,
         score: data.confidence || 0,
         userRole: 'Unified Chatbot Guest',
-        fallbackTriggered: data.isNoVerifiedWarning === true
+        fallbackTriggered: isUnverified
       });
 
     } catch (err) {
       console.error('Chat request failed:', err);
       setIsTyping(false);
+      setLastUnansweredQuery(text);
+      setShowNoAnswerPopup(true);
       setMessages(prev => [...prev, {
         id: `msg-${Date.now()}-bot`,
         sender: 'bot',
-        text: "I couldn't find this information in the Knowledge Base.",
+        text: "I couldn't find verified information for this question in the official college records. Please fill out a support ticket for direct assistance.",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        suggestedQuestions: ['Raise Support Ticket']
+        suggestedQuestions: ['🎫 Open Support Ticket Form'],
+        suggestOpenTicket: true,
+        isNoVerifiedWarning: true,
+        unansweredQuery: text
       }]);
       playNotificationSound('receive');
     }
@@ -1737,6 +1809,10 @@ export default function ChatbotWidget({
       setActiveTab('student-portal');
       return;
     }
+    if (cleanReply === 'Raise Support Ticket' || cleanReply === 'Open Support Ticket Form' || cleanReply === 'Support Ticket' || cleanReply === 'Open Ticket') {
+      setActiveTab('ticketForm');
+      return;
+    }
     handleSendMessage(reply);
   };
 
@@ -1816,12 +1892,12 @@ export default function ChatbotWidget({
               }
               className={`pointer-events-auto relative ${isDark ? 'dark' : ''} ${
                 isMaximized 
-                  ? 'w-full h-full sm:rounded-3xl rounded-none border-0 sm:border' 
-                  : customSize ? 'mb-2 rounded-3xl border' : 'w-[95vw] sm:w-[440px] h-[80vh] sm:h-[610px] mb-2 rounded-3xl border'
-              } flex flex-col overflow-hidden transition-all duration-300 max-h-[90vh] shadow-2xl ${
+                  ? 'w-full h-full sm:rounded-[28px] rounded-none border-0 sm:border' 
+                  : customSize ? 'mb-2 rounded-[28px] border' : 'w-[95vw] sm:w-[440px] h-[80vh] sm:h-[620px] mb-2 rounded-[28px] border'
+              } flex flex-col overflow-hidden transition-all duration-300 max-h-[92vh] shadow-2xl nexa-glass-shell nexa-edge-light ${
                 isDark 
-                  ? 'bg-slate-950 border-slate-850 text-slate-100 shadow-indigo-950/20' 
-                  : 'bg-white border-slate-200 text-slate-900 shadow-slate-350/30'
+                  ? 'bg-slate-950/92 border-slate-700/60 text-slate-100 shadow-[0_25px_80px_-15px_rgba(0,0,0,0.85),0_0_40px_rgba(59,130,246,0.14)]' 
+                  : 'bg-white/95 border-slate-200/90 text-slate-900 shadow-slate-350/40'
               }`}
             >
               {/* Eight unobtrusive handles make resizing natural from every edge
@@ -1856,56 +1932,45 @@ export default function ChatbotWidget({
                 />
               ))}
 
-            {/* Header with Branding matching Image 1 Reference */}
-            <div className={`p-4 flex items-center justify-between border-b shrink-0 relative overflow-hidden min-h-0`}
-              style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }}>
+            {/* Header with Dark Tech Glassmorphic Finish */}
+            <div className={`px-4 py-3.5 flex items-center justify-between border-b shrink-0 relative overflow-hidden min-h-0 backdrop-blur-xl ${
+              isDark 
+                ? 'bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950/70 border-slate-800/80' 
+                : 'bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950/90 border-slate-700/60'
+            }`}>
               <div className="flex items-center gap-3 relative z-10 min-w-0">
-                <div className="relative flex items-center shrink-0">
-                  <RobotLogo className="w-10 h-10 shrink-0" animate={true} />
+                <div className="relative flex items-center shrink-0 p-0.5 rounded-full bg-slate-800/60 border border-slate-700/50 shadow-inner">
+                  <RobotLogo className="w-9 h-9 shrink-0" animate={true} />
                 </div>
                 <div className="flex flex-col justify-center min-w-0">
-                  <h3 className="font-extrabold text-[15px] tracking-tight nexa-display leading-tight text-white flex flex-col">
-                    <span>Narayana</span>
-                    <span className="text-white flex items-center gap-1.5">
-                      NEXA
-                      <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-bold font-sans ml-1 shrink-0">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                        {t('online')}
-                      </span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-[15px] tracking-tight nexa-display leading-tight text-white drop-shadow-sm">
+                      NECN NEXA
                     </span>
-                  </h3>
+                    <span className="inline-flex items-center gap-1.5 text-[9px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold font-sans shrink-0 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                      Online
+                    </span>
+                  </div>
+                  <span className="text-slate-300 text-[11px] font-medium tracking-normal truncate flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+                    AI Assistant
+                  </span>
                 </div>
               </div>
 
-              {/* Utility shortcuts matching Image 1 */}
-              <div className="flex items-center gap-2 relative z-10 shrink-0">
-                {/* Language Switcher Toggle Pill matching Image 1 */}
-                <div className="flex bg-slate-800/80 p-0.5 rounded-xl border border-slate-700/50 shrink-0">
-                  {(['en', 'hi', 'te'] as const).map((lang) => (
-                    <button
-                      key={lang}
-                      onClick={() => setLanguage(lang)}
-                      className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase transition-all cursor-pointer min-w-[28px] ${
-                        language === lang 
-                          ? 'bg-blue-600 text-white shadow-sm' 
-                          : 'text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      {lang}
-                    </button>
-                  ))}
-                </div>
-
+              {/* Utility shortcuts */}
+              <div className="flex items-center gap-1.5 relative z-10 shrink-0">
                 <button 
                   id="chatbot-theme-toggle"
                   onClick={() => toggleTheme()}
-                  className="p-1.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all cursor-pointer shrink-0"
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 border border-transparent hover:border-slate-700/60 transition-all cursor-pointer shrink-0"
                   title="Toggle Dark Mode"
                 >
                   {isDark ? (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m2.828-9.9a5 5 0 11-7.07 7.07l.707-.707" /></svg>
+                    <svg className="w-4 h-4 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m2.828-9.9a5 5 0 11-7.07 7.07l.707-.707" /></svg>
                   ) : (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                    <svg className="w-4 h-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
                   )}
                 </button>
 
@@ -1913,7 +1978,7 @@ export default function ChatbotWidget({
 
                 <button 
                   onClick={() => setIsMaximized(!isMaximized)}
-                  className="p-1.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all cursor-pointer shrink-0"
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 border border-transparent hover:border-slate-700/60 transition-all cursor-pointer shrink-0"
                   title={isMaximized ? "Minimize Chat" : "Maximize Chat"}
                 >
                   {isMaximized ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -1921,7 +1986,7 @@ export default function ChatbotWidget({
 
                 <button 
                   onClick={() => setIsOpen(false)}
-                  className="p-1.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all cursor-pointer shrink-0"
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 border border-transparent hover:border-slate-700/60 transition-all cursor-pointer shrink-0"
                   title="Minimize"
                 >
                   <Minus className="w-4 h-4" />
@@ -1929,67 +1994,67 @@ export default function ChatbotWidget({
               </div>
             </div>
 
-            {/* Navigation Tabs matching Image 1 Reference */}
-            <div className={`px-3 py-2 border-b text-[12px] flex items-center justify-around font-medium shrink-0 select-none gap-1 ${
-              isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+            {/* Navigation Tabs - Modern Glass Pill Switcher */}
+            <div className={`px-3 py-2 border-b text-[12px] flex items-center justify-around font-medium shrink-0 select-none gap-1.5 backdrop-blur-md ${
+              isDark ? 'bg-slate-900/90 border-slate-800/80' : 'bg-slate-50/95 border-slate-200/90'
             }`}>
-              {/* 1. Chat Tab - Blue */}
+              {/* 1. Chat Tab */}
               <button
                 onClick={() => {
                   setActiveTab('chat');
                 }}
-                className={`flex items-center gap-1.5 py-1.5 px-3 rounded-lg transition-colors cursor-pointer ${
+                className={`flex items-center gap-1.5 py-1.5 px-3 rounded-xl transition-all cursor-pointer ${
                   activeTab === 'chat'
-                    ? 'text-blue-600 dark:text-blue-400 font-extrabold border-b-2 border-blue-600 dark:border-blue-400 -mb-[9px] pb-2'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400 font-bold border border-blue-500/30 shadow-[0_0_12px_rgba(59,130,246,0.18)] scale-[1.02]'
+                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
                 }`}
               >
-                <MessageSquare className={`w-4 h-4 ${activeTab === 'chat' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500'}`} />
+                <MessageSquare className={`w-3.5 h-3.5 ${activeTab === 'chat' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}`} />
                 <span>{t('chat')}</span>
               </button>
 
-              {/* 2. Portals Tab - Indigo */}
+              {/* 2. Portals Tab */}
               <button
                 onClick={() => {
                   setActiveTab('student-portal');
                 }}
-                className={`flex items-center gap-1.5 py-1.5 px-3 rounded-lg transition-colors cursor-pointer ${
+                className={`flex items-center gap-1.5 py-1.5 px-3 rounded-xl transition-all cursor-pointer ${
                   activeTab === 'student-portal'
-                    ? 'text-indigo-600 dark:text-indigo-400 font-extrabold border-b-2 border-indigo-600 dark:border-indigo-400 -mb-[9px] pb-2'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 font-bold border border-indigo-500/30 shadow-[0_0_12px_rgba(99,102,241,0.18)] scale-[1.02]'
+                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
                 }`}
               >
-                <GraduationCap className={`w-4 h-4 ${activeTab === 'student-portal' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500'}`} />
+                <GraduationCap className={`w-3.5 h-3.5 ${activeTab === 'student-portal' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`} />
                 <span>{t('portal')}</span>
               </button>
 
-              {/* 3. Tracker Tab - Emerald / Green */}
+              {/* 3. Tracker Tab */}
               <button
                 onClick={() => {
                   setActiveTab('tracker');
                 }}
-                className={`flex items-center gap-1.5 py-1.5 px-3 rounded-lg transition-colors cursor-pointer ${
+                className={`flex items-center gap-1.5 py-1.5 px-3 rounded-xl transition-all cursor-pointer ${
                   activeTab === 'tracker'
-                    ? 'text-emerald-600 dark:text-emerald-400 font-extrabold border-b-2 border-emerald-600 dark:border-emerald-400 -mb-[9px] pb-2'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.18)] scale-[1.02]'
+                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
                 }`}
               >
-                <UserCheck className={`w-4 h-4 ${activeTab === 'tracker' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}`} />
+                <UserCheck className={`w-3.5 h-3.5 ${activeTab === 'tracker' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`} />
                 <span>{t('tracker')}</span>
               </button>
 
-              {/* 4. Notices Tab - Amber */}
+              {/* 4. Notices Tab */}
               <button
                 onClick={() => {
                   setActiveTab('notices');
                 }}
-                className={`flex items-center gap-1.5 py-1.5 px-3 rounded-lg transition-colors cursor-pointer ${
+                className={`flex items-center gap-1.5 py-1.5 px-3 rounded-xl transition-all cursor-pointer ${
                   activeTab === 'notices'
-                    ? 'text-amber-600 dark:text-amber-400 font-extrabold border-b-2 border-amber-600 dark:border-amber-400 -mb-[9px] pb-2'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.18)] scale-[1.02]'
+                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
                 }`}
               >
-                <Bell className={`w-4 h-4 ${activeTab === 'notices' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500'}`} />
+                <Bell className={`w-3.5 h-3.5 ${activeTab === 'notices' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400'}`} />
                 <span>{t('notices')}</span>
               </button>
             </div>
@@ -2038,7 +2103,7 @@ export default function ChatbotWidget({
                           </div>
                         </div>
                       ) : (
-                        <div className="max-w-[88%] text-sm relative group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden text-slate-900 dark:text-slate-100">
+                        <div className="max-w-[90%] text-sm relative group bg-white/95 dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800/90 backdrop-blur-md rounded-2xl shadow-xs overflow-hidden text-slate-800 dark:text-slate-100">
                           <div className="px-4 pt-3.5 pb-2">
                             {/* 1. ANSWER FIRST */}
                             {msg.id === 'welcome' ? (
@@ -2089,6 +2154,20 @@ export default function ChatbotWidget({
                                 >
                                   {language !== 'en' && translatedMessages[`${msg.id}_${language}`] ? translatedMessages[`${msg.id}_${language}`] : msg.text}
                                 </ReactMarkdown>
+                              </div>
+                            )}
+
+                            {/* Inline 1-click action button for support tickets */}
+                            {/\b(?:support\s+ticket|open\s+ticket|raise\s+ticket)\b/i.test(msg.text) && (
+                              <div className="mt-2.5">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveTab('ticketForm')}
+                                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-all cursor-pointer"
+                                >
+                                  <Ticket className="w-3.5 h-3.5" />
+                                  <span>Open Support Ticket Form</span>
+                                </button>
                               </div>
                             )}
 
@@ -2258,7 +2337,7 @@ export default function ChatbotWidget({
                                   onClick={() => {
                                     if (q === 'View Main FAQs') {
                                       handleQuickReply('FAQ');
-                                    } else if (q === '🎫 Open Support Ticket Form') {
+                                    } else if (q === '🎫 Open Support Ticket Form' || q === 'Raise Support Ticket' || q === 'Support Ticket' || q === 'Open Ticket') {
                                       setActiveTab('ticketForm');
                                     } else {
                                       handleSendMessage(q);
@@ -2277,14 +2356,19 @@ export default function ChatbotWidget({
                   ))}
 
                   {isTyping && (
-                    <div className="flex items-start">
-                      <div className={`rounded-2xl px-3 py-2 border shadow-sm ${
-                        isDark ? 'bg-slate-900 border-slate-850' : 'bg-white border-slate-100'
+                    <div className="flex items-start animate-fade-in">
+                      <div className={`rounded-2xl px-3.5 py-2.5 border shadow-sm ${
+                        isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
                       }`}>
-                        <div className="flex space-x-1.5 items-center justify-center h-4">
-                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                        <div className="flex items-center gap-2.5 text-xs text-blue-600 dark:text-blue-400 font-medium">
+                          <div className="flex space-x-1 items-center">
+                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                          </div>
+                          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                            Searching 24,853 verified NECN chunks &amp; synthesizing response...
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -2296,14 +2380,73 @@ export default function ChatbotWidget({
                       {ratingMessage}
                     </div>
                   )}
+
+                  {/* Interactive Support Ticket Popup for Unanswered Queries */}
+                  <AnimatePresence>
+                    {showNoAnswerPopup && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 15, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.96 }}
+                        transition={{ duration: 0.25 }}
+                        className={`p-3.5 rounded-2xl border shadow-lg relative overflow-hidden backdrop-blur-md ${
+                          isDark
+                            ? 'bg-slate-900/95 border-blue-500/30 text-white'
+                            : 'bg-white/95 border-blue-200 text-slate-900'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500 shrink-0 mt-0.5">
+                            <Ticket className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0 pr-6">
+                            <h4 className="text-xs font-bold flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
+                              <span>Need Help? Open a Support Ticket</span>
+                            </h4>
+                            <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+                              We couldn't locate official records for this question{lastUnansweredQuery ? `: "${lastUnansweredQuery}"` : ''}. Would you like to raise a support ticket so our administration desk can assist you directly?
+                            </p>
+                            <div className="flex items-center gap-2 mt-2.5">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setShowNoAnswerPopup(false);
+                                  setActiveTab('ticketForm');
+                                }}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-all cursor-pointer"
+                              >
+                                <Ticket className="w-3.5 h-3.5" />
+                                <span>Open Support Ticket</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setShowNoAnswerPopup(false)}
+                                className="px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                              >
+                                Dismiss
+                              </button>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setShowNoAnswerPopup(false)}
+                            className="absolute top-2.5 right-2.5 p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                            title="Close"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                   </div>
                   <div ref={messagesEndRef} />
                 </div>
 
 
-                {/* Quick Action Bar matching Image 1 (Pills with blue outlines) */}
-                <div onPointerDown={startScrollDrag('x')} className={`chat-scroll-area px-3 py-2.5 border-t flex gap-2 overflow-x-auto whitespace-nowrap cursor-grab active:cursor-grabbing ${
-                  isDark ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-200'
+                {/* Quick Action Bar - Frosted Glass Carousel (No harsh black buttons) */}
+                <div onPointerDown={startScrollDrag('x')} className={`chat-scroll-area px-3.5 py-2.5 border-t flex gap-2 overflow-x-auto whitespace-nowrap cursor-grab active:cursor-grabbing backdrop-blur-md ${
+                  isDark ? 'bg-slate-950/80 border-slate-800/80' : 'bg-slate-50/95 border-slate-200/80'
                 }`}>
                   {getDynamicQuickReplies().map((reply) => {
                     const isTicket = reply === 'Raise Support Ticket';
@@ -2311,12 +2454,16 @@ export default function ChatbotWidget({
                       <button
                         key={reply}
                         onClick={() => handleQuickReply(reply)}
-                        className={isTicket ? 'flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold border border-blue-200 text-blue-600 bg-white hover:bg-blue-50 transition-all shrink-0 shadow-sm cursor-pointer' : 'px-3.5 py-1.5 rounded-full text-xs font-semibold border border-blue-500/40 text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-all shrink-0 shadow-sm cursor-pointer'}
+                        className={
+                          isTicket 
+                            ? 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border border-blue-200 dark:border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-50/90 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-all shrink-0 shadow-xs cursor-pointer' 
+                            : 'px-3.5 py-1.5 rounded-full text-xs font-semibold border border-slate-200/90 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white/95 dark:bg-slate-900/80 hover:bg-blue-50/90 dark:hover:bg-slate-850 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-500/40 transition-all shrink-0 shadow-xs cursor-pointer hover:-translate-y-0.5'
+                        }
                       >
                         {isTicket ? (
                           <>
-                            <Ticket className="w-4 h-4 text-blue-600" />
-                            {reply}
+                            <Ticket className="w-3.5 h-3.5 text-blue-500" />
+                            <span>{reply}</span>
                           </>
                         ) : reply}
                       </button>
@@ -2326,11 +2473,11 @@ export default function ChatbotWidget({
 
                 {/* Autocomplete Instant Suggestion Dropdown */}
                 {getAutocompleteSuggestions().length > 0 && (
-                  <div onPointerDown={startScrollDrag('y')} className={`chat-scroll-area absolute bottom-full left-0 w-full z-[100] px-4 py-2 border-t text-xs space-y-2 max-h-40 overflow-y-auto shadow-xl cursor-grab active:cursor-grabbing ${
-                    isDark ? 'bg-slate-950/95 border-slate-700' : 'bg-blue-50/95 border-blue-200'
+                  <div onPointerDown={startScrollDrag('y')} className={`chat-scroll-area absolute bottom-full left-0 w-full z-[100] px-4 py-3 border-t text-xs space-y-2 max-h-48 overflow-y-auto shadow-2xl cursor-grab active:cursor-grabbing backdrop-blur-2xl ${
+                    isDark ? 'bg-slate-950/95 border-slate-800' : 'bg-slate-900/95 border-slate-700 text-white'
                   }`}>
-                    <div className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-extrabold flex items-center gap-1 font-mono">
-                      <Sparkles className="w-3 h-3 text-amber-500" />
+                    <div className="text-[10px] uppercase tracking-wider text-blue-400 font-extrabold flex items-center gap-1.5 font-mono">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
                       Instant Suggestions
                     </div>
                     <div className="flex flex-col gap-1.5 text-xs">
@@ -2339,37 +2486,38 @@ export default function ChatbotWidget({
                           type="button"
                           key={sRule.id}
                           onClick={() => handleSendMessage(sRule.question)}
-                          className={`text-left w-full truncate py-1.5 px-2 rounded-md font-medium cursor-pointer text-xs flex items-center gap-2 border border-transparent transition-all ${isDark ? "hover:bg-slate-800 text-slate-200 hover:border-slate-700" : "hover:bg-blue-100 text-slate-900 hover:border-blue-200"}`}
+                          className={`text-left w-full truncate py-2 px-3 rounded-xl font-medium cursor-pointer text-xs flex items-center gap-2 border border-slate-800/60 hover:border-blue-500/50 bg-slate-900/50 hover:bg-slate-850 text-slate-200 hover:text-white transition-all`}
                         >
-                          <span className="text-blue-400">•</span> {sRule.question}
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0"></span>
+                          <span className="truncate">{sRule.question}</span>
                         </button>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Input Area matching Image 1 Reference */}
+                {/* Input Area - Floating Glass Capsule */}
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
                     handleSendMessage(inputText);
                   }}
-                  className={`px-3 py-3 border-t relative z-10 flex gap-2 items-center ${
-                    isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+                  className={`px-3 py-3 border-t relative z-10 flex gap-2 items-center backdrop-blur-xl ${
+                    isDark ? 'bg-slate-950/90 border-slate-800/80' : 'bg-white/95 border-slate-200/90'
                   }`}
                 >
                   <button
                     type="button"
                     onClick={handleListen}
-                    className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all cursor-pointer ${
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all cursor-pointer ${
                       isListening 
-                        ? 'bg-rose-500/20 text-rose-500 ring-2 ring-rose-500' 
-                        : (isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')
+                        ? 'bg-rose-500/20 text-rose-400 ring-2 ring-rose-500/50 animate-pulse shadow-[0_0_15px_rgba(244,63,94,0.35)]' 
+                        : (isDark ? 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200')
                     }`}
                     title="Speak question"
                   >
                     {isListening ? (
-                      <MicOff className="w-4 h-4 text-rose-500" />
+                      <MicOff className="w-4 h-4 text-rose-400" />
                     ) : (
                       <Mic className="w-4 h-4" />
                     )}
@@ -2381,23 +2529,26 @@ export default function ChatbotWidget({
                       value={inputText}
                       onChange={(e) => setInputText(e.target.value)}
                       placeholder="Ask Admissions, placement records, faculty..."
-                      className={`w-full px-4 py-2.5 text-xs rounded-full border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 ${
-                        isDark ? 'bg-slate-950 border-slate-800 text-white placeholder:text-slate-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 font-medium'
+                      className={`w-full px-4 py-2 text-xs rounded-xl border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/80 ${
+                        isDark 
+                          ? 'bg-slate-900/90 border-slate-750 text-white placeholder:text-slate-500 shadow-inner' 
+                          : 'bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 font-medium shadow-inner'
                       }`}
                     />
                     {showSuggestions && suggestions.length > 0 && (
-                      <div className="absolute bottom-full mb-2 w-full bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 z-50 overflow-hidden">
+                      <div className="absolute bottom-full mb-2 w-full bg-slate-900/95 backdrop-blur-xl rounded-xl shadow-2xl border border-slate-800 z-50 overflow-hidden">
                         {suggestions.map((suggestion) => (
                           <div 
                             key={suggestion.id}
-                            className="p-3 text-xs cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-0 text-slate-800 dark:text-slate-200 font-medium"
+                            className="p-3 text-xs cursor-pointer hover:bg-slate-800/80 border-b border-slate-800/60 last:border-0 text-slate-200 font-medium flex items-center gap-2"
                             onClick={() => {
                               setInputText(suggestion.question);
                               setShowSuggestions(false);
                               handleSendMessage(suggestion.question);
                             }}
                           >
-                            {suggestion.question}
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0"></span>
+                            <span>{suggestion.question}</span>
                           </div>
                         ))}
                       </div>
@@ -2406,11 +2557,20 @@ export default function ChatbotWidget({
                   <button
                     type="submit"
                     disabled={!inputText.trim()}
-                    className={`w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer shadow-md disabled:opacity-40 disabled:cursor-not-allowed`}
+                    className={`w-9 h-9 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer shadow-lg shadow-blue-600/25 disabled:opacity-35 disabled:cursor-not-allowed disabled:shadow-none hover:scale-105 active:scale-95`}
                   >
                     <Send className="w-4 h-4" />
                   </button>
                 </form>
+
+                {/* Sub-footer Centered Attribution */}
+                <div className={`py-1.5 px-4 border-t text-[10px] flex items-center justify-center text-center font-mono shrink-0 select-none backdrop-blur-md ${
+                  isDark ? 'bg-slate-950/95 border-slate-800/80 text-slate-500' : 'bg-slate-50/95 border-slate-200/80 text-slate-500'
+                }`}>
+                  {isVerified && (
+                    <AttributionMark variant="subfooter" />
+                  )}
+                </div>
               </>
             ) : activeTab === 'ticketForm' ? (
               /* ==================== SCREEN: Support Ticket Form ==================== */
@@ -2819,13 +2979,13 @@ export default function ChatbotWidget({
       </AnimatePresence>
       </div>
       
-      {/* 2. Floating Circular Launch Button with Airtel/Gitam Branding */}
+      {/* 2. Floating Circular Launch Button with Dark Tech Glass Halo */}
       <motion.button
         id="chatbot-floating-toggle-btn"
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.95 }}
-        className={`w-16 h-16 rounded-full bg-slate-900 hover:bg-slate-850 text-white flex items-center justify-center shadow-2xl cursor-pointer pointer-events-auto mt-4 border border-slate-800 relative group transition-all duration-300 ${
+        whileTap={{ scale: 0.94 }}
+        className={`w-16 h-16 rounded-full bg-slate-950/90 backdrop-blur-2xl text-white flex items-center justify-center cursor-pointer pointer-events-auto mt-4 border border-blue-500/30 relative group transition-all duration-300 shadow-[0_12px_36px_-6px_rgba(37,99,235,0.45),0_0_24px_rgba(99,102,241,0.25)] hover:border-blue-400/60 hover:shadow-[0_16px_48px_-6px_rgba(37,99,235,0.6),0_0_35px_rgba(99,102,241,0.4)] ${
           !isOpen ? 'animate-border-glow animate-floating' : ''
         }`}
         title="Narayana NEXA Assistant"
@@ -2839,7 +2999,7 @@ export default function ChatbotWidget({
               exit={{ rotate: 90, opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <X className="w-6 h-6 text-slate-300" />
+              <X className="w-6 h-6 text-slate-200" />
             </motion.div>
           ) : (
             <motion.div
@@ -2851,17 +3011,17 @@ export default function ChatbotWidget({
               className="relative w-full h-full flex items-center justify-center p-1"
             >
               <RobotLogo className="w-13 h-13" animate={true} />
-              {/* Notification bubble */}
-              <span className="absolute top-2.5 right-2.5 w-3.5 h-3.5 bg-rose-500 border-2 border-slate-900 rounded-full animate-pulse"></span>
+              {/* Glowing notification badge */}
+              <span className="absolute top-2.5 right-2.5 w-3.5 h-3.5 bg-rose-500 border-2 border-slate-950 rounded-full animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.6)]"></span>
             </motion.div>
           )}
         </AnimatePresence>
         
         {/* Tooltip hint */}
         {!isOpen && (
-          <div className="absolute right-20 top-1/2 -translate-y-1/2 bg-slate-900 border border-slate-800 text-white text-[11px] font-bold py-1.5 px-3 rounded-xl shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none duration-200 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            Narayana NEXA Counsel Desk
+          <div className="absolute right-20 top-1/2 -translate-y-1/2 bg-slate-950/95 border border-slate-800 backdrop-blur-xl text-white text-[11px] font-bold py-1.5 px-3 rounded-xl shadow-2xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none duration-200 flex items-center gap-1.5 font-sans">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_rgba(52,211,153,0.8)]"></span>
+            NEXA AI Assistant
           </div>
         )}
       </motion.button>
@@ -2913,37 +3073,38 @@ export default function ChatbotWidget({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.35 }}
-          className="fixed inset-0 z-[9999] bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 z-[9999] bg-slate-950/85 backdrop-blur-2xl flex items-center justify-center p-4 overflow-y-auto"
         >
           <motion.div
             initial={{ scale: 0.9, y: 30 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.9, y: 30 }}
             transition={{ type: 'spring', damping: 25, stiffness: 180 }}
-            className="max-w-md w-full bg-slate-900 border border-slate-800/80 text-white rounded-3xl p-8 shadow-2xl flex flex-col items-center text-center space-y-6 relative"
+            className="max-w-md w-full bg-slate-950/95 border border-slate-750/80 text-white rounded-[28px] p-8 shadow-[0_30px_90px_rgba(0,0,0,0.85),0_0_50px_rgba(59,130,246,0.2)] flex flex-col items-center text-center space-y-6 relative nexa-edge-light"
           >
             <button
               onClick={() => setShowFirstVisitPopup(false)}
-              className="absolute top-4 right-4 p-2 text-slate-500 hover:text-white transition-colors"
+              className="absolute top-4 right-4 p-2 text-slate-500 hover:text-white rounded-xl hover:bg-slate-900/80 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
             {/* Logo box */}
-            <div className="relative p-5 bg-slate-950/50 rounded-full border border-slate-800 shadow-inner">
+            <div className="relative p-5 bg-slate-900/60 rounded-full border border-slate-750 shadow-[0_0_30px_rgba(59,130,246,0.15)]">
               <RobotLogo className="w-24 h-24" animate={true} />
-              <span className="absolute inset-0 rounded-full border border-blue-500/20 animate-ping pointer-events-none"></span>
+              <span className="absolute inset-0 rounded-full border border-blue-500/30 animate-ping pointer-events-none"></span>
             </div>
 
             <div className="space-y-2">
-              <span className="px-3 py-1 bg-blue-500/10 text-blue-400 text-[10px] font-bold uppercase tracking-wider rounded-full border border-blue-500/20 font-mono">
-                YOUR SMART ASSISTANT
+              <span className="px-3.5 py-1 bg-blue-500/15 text-blue-400 text-[10px] font-bold uppercase tracking-wider rounded-full border border-blue-500/30 font-mono shadow-[0_0_10px_rgba(59,130,246,0.15)]">
+                SMART AI ASSISTANT
               </span>
-              <h2 className="text-2xl font-extrabold tracking-tight text-white font-sans mt-2">
+              <h2 className="text-2xl font-extrabold tracking-tight text-white font-sans mt-2 drop-shadow-sm">
                 Welcome to Narayana NEXA
               </h2>
               <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
                 The Official Digital Assistant of Narayana Engineering College.
               </p>
+              {isVerified && <AttributionMark variant="pill" />}
             </div>
 
             <div className="w-full flex flex-col gap-3 pt-2">
@@ -2953,13 +3114,11 @@ export default function ChatbotWidget({
                   setIsOpen(true);
                   setActiveTab('chat');
                 }}
-                className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white font-bold text-sm rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 cursor-pointer"
               >
-                Continue to Nexa
+                Continue to NEXA Desk
               </button>
             </div>
-
-
           </motion.div>
         </motion.div>
       )}

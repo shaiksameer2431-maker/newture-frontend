@@ -173,8 +173,8 @@ export default function WebsiteKnowledgePanel({ isDark }: Props) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          domain: 'necn.ac.in',
-          crawl_url: 'https://necn.ac.in/',
+          domain: settings.domain || 'necn.ac.in',
+          crawl_url: settings.crawl_url || 'https://necn.ac.in/',
           crawl_limit: Number(settings.crawl_limit ?? 0),
           scheduled_interval_hours: Number(settings.scheduled_interval_hours || 24),
           is_scheduled_sync: settings.is_scheduled_sync ? 1 : 0
@@ -287,7 +287,15 @@ export default function WebsiteKnowledgePanel({ isDark }: Props) {
             {embedding ? 'Embedding…' : 'Build Semantic Index'}
           </button>
         </div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <label className={`text-[11px] font-semibold ${muted}`}>
+            Knowledge domain
+            <input type="text" value={settings.domain ?? ''} onChange={e => setSettings({...settings, domain: e.target.value})} className="mt-1 w-full rounded-lg border bg-transparent px-2.5 py-2 text-xs" />
+          </label>
+          <label className={`text-[11px] font-semibold ${muted}`}>
+            Crawl start URL
+            <input type="text" value={settings.crawl_url ?? ''} onChange={e => setSettings({...settings, crawl_url: e.target.value})} className="mt-1 w-full rounded-lg border bg-transparent px-2.5 py-2 text-xs" />
+          </label>
           <label className={`text-[11px] font-semibold ${muted}`}>
             Crawl limit (0 = all discovered)
             <input type="number" min="0" max="5000" value={settings.crawl_limit ?? 0} onChange={e => setSettings({...settings, crawl_limit: e.target.value})} className="mt-1 w-full rounded-lg border bg-transparent px-2.5 py-2 text-xs" />
@@ -296,7 +304,9 @@ export default function WebsiteKnowledgePanel({ isDark }: Props) {
             Automatic sync interval (hours)
             <input type="number" min="1" max="168" value={settings.scheduled_interval_hours ?? 24} onChange={e => setSettings({...settings, scheduled_interval_hours: e.target.value})} className="mt-1 w-full rounded-lg border bg-transparent px-2.5 py-2 text-xs" />
           </label>
-          <label className={`flex items-end gap-2 text-[11px] font-semibold ${muted}`}>
+        </div>
+        <div className="mt-3 flex items-center gap-2">
+          <label className={`flex items-center gap-2 text-[11px] font-semibold ${muted}`}>
             <input type="checkbox" checked={Boolean(Number(settings.is_scheduled_sync ?? 1))} onChange={e => setSettings({...settings, is_scheduled_sync: e.target.checked ? 1 : 0})} />
             Enable automatic incremental sync
           </label>

@@ -15,6 +15,8 @@ import WebsiteKnowledgePanel from './admin/WebsiteKnowledgePanel';
 import { ToastProvider, useToast } from './admin/Toast';
 import { useTheme } from '../utils/ThemeContext';
 import { apiFetch } from '../lib/api';
+import { useAttribution } from './attribution/useAttribution';
+import { AttributionMark } from './attribution/AttributionMark';
 
 interface AdminDashboardProps {
   rules: Rule[];
@@ -32,6 +34,7 @@ interface AdminDashboardProps {
   onResetAll: () => void;
   typingSpeed: number;
   setTypingSpeed: (speed: number) => void;
+  onLogout?: () => void;
 }
 
 export default function AdminDashboard(props: AdminDashboardProps) {
@@ -54,10 +57,12 @@ function AdminDashboardInner({
   onResetAll,
   calendarItems,
   typingSpeed,
-  setTypingSpeed
+  setTypingSpeed,
+  onLogout
 }: AdminDashboardProps) {
   const { showToast } = useToast();
   const { isDark, toggleTheme } = useTheme();
+  const { attribution, isVerified } = useAttribution();
 
   // Navigation / Tabs state
   const [activeTab, setActiveTab] = useState<'attendance' | 'tickets' | 'rules' | 'notices' | 'databases' | 'notifications' | 'notification-settings'>('attendance');
@@ -80,7 +85,7 @@ function AdminDashboardInner({
       
       {/* Top Banner Control Header */}
       <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div className="max-w-[1720px] w-full mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-extrabold shadow-md shadow-blue-500/10 text-sm tracking-tight">
               NECN
@@ -89,27 +94,45 @@ function AdminDashboardInner({
               <h1 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
                 Narayana Admin Control Panel 🛡️
               </h1>
-              <p className="text-[10px] font-mono text-slate-400 font-medium">SQLITE DATABASE CONNECTED</p>
+              <p className="text-[10px] font-mono text-slate-400 font-medium flex items-center gap-1">
+                <span>SQLITE DB CONNECTED</span>
+                {isVerified && (
+                  <>
+                    <span>•</span>
+                    <AttributionMark variant="subfooter" />
+                  </>
+                )}
+              </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-[10px] bg-emerald-500/10 text-emerald-500 border border-emerald-500/10 font-bold px-2.5 py-1 rounded-full uppercase flex items-center gap-1">
+            <span className="hidden sm:flex text-[10px] bg-emerald-500/10 text-emerald-500 border border-emerald-500/10 font-bold px-2.5 py-1 rounded-full uppercase items-center gap-1">
               <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
               Operational State Active
             </span>
-            <button type="button" onClick={() => toggleTheme()} aria-label={isDark ? 'Switch admin dashboard to light mode' : 'Switch admin dashboard to dark mode'} className="nexa-focus flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+            <button type="button" onClick={() => toggleTheme()} aria-label={isDark ? 'Switch admin dashboard to light mode' : 'Switch admin dashboard to dark mode'} className="nexa-focus flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer">
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
+            {onLogout && (
+              <button
+                type="button"
+                onClick={onLogout}
+                className="nexa-focus flex h-9 px-3.5 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-700 shadow-sm transition-all hover:bg-slate-200 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 text-xs font-bold gap-2 cursor-pointer"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Back to Portal</span>
+              </button>
+            )}
           </div>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
+      <div className="flex-1 max-w-[1720px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col lg:flex-row gap-6 lg:gap-8">
         
         {/* Navigation Sidebar */}
-        <aside className="w-full md:w-64 shrink-0 space-y-2">
+        <aside className="w-full lg:w-64 xl:w-72 shrink-0 space-y-2 lg:sticky lg:top-20 lg:self-start">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs space-y-1">
             <div className="text-[10px] font-mono font-bold text-slate-400 uppercase px-3 pb-2 border-b border-slate-100 dark:border-slate-800 mb-2">
               ADMINISTRATION MODULES
@@ -351,6 +374,20 @@ function AdminDashboardInner({
 
         </main>
       </div>
+
+      <footer className="mt-auto py-4 px-4 sm:px-6 lg:px-8 border-t border-slate-200 dark:border-slate-800/80 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-3 bg-white dark:bg-slate-900/50 w-full">
+        <div className="max-w-[1720px] mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div>
+            <span>Narayana Engineering College, Nellore — Administrative Command Console</span>
+          </div>
+          {isVerified && (
+            <div className="flex items-center gap-2 font-mono">
+              <span className="text-[11px] text-slate-400">System Architect:</span>
+              <AttributionMark variant="footer" />
+            </div>
+          )}
+        </div>
+      </footer>
     </div>
   );
 }

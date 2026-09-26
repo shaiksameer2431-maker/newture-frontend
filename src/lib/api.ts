@@ -28,5 +28,21 @@ export function apiUrl(path: string): string {
 }
 
 export function apiFetch(input: string, init?: RequestInit): Promise<Response> {
-  return fetch(apiUrl(input), init);
+  const token = typeof window !== 'undefined' ? localStorage.getItem('necn_admin_token') : null;
+  const headers = {
+    ...init?.headers,
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+  return fetch(apiUrl(input), {
+    ...init,
+    headers
+  }).then(response => {
+    // If we get a 401 on a non-login request and we had a token, the token is stale — clear it.
+    // Do NOT reload the page here; that causes infinite reload loops.
+    if (response.status === 401 && token && !input.includes('/api/auth/login')) {
+      localStorage.removeItem('necn_admin_token');
+      localStorage.removeItem('necn_admin_user');
+    }
+    return response;
+  });
 }

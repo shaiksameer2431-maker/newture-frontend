@@ -91,6 +91,9 @@ export interface Message {
   sourcePage?: string | null;
   sourceCategory?: string | null;
   sources?: Array<{ title: string; url: string }>;
+  suggestOpenTicket?: boolean;
+  unansweredQuery?: string;
+  isNoVerifiedWarning?: boolean;
 }
 
 export interface SupportTicket {

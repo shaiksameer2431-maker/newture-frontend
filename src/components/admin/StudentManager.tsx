@@ -680,7 +680,7 @@ export default function StudentManager({ onStateChanged }: StudentManagerProps) 
                   required
                   value={newStudentName}
                   onChange={(e) => setNewStudentName(e.target.value)}
-                  placeholder="e.g. Shaik Sameer"
+                  placeholder="e.g. Student Name"
                   className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-850 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                 />
               </div>

@@ -21,17 +21,17 @@
   --nexa-radius-md: .875rem;
   --nexa-radius-lg: 1.25rem;
   --nexa-radius-xl: 1.5rem;
-  --nexa-primary: #2563EB;
-  --nexa-primary-soft: rgba(37, 99, 235, 0.08);
-  --nexa-primary-hover: #1d4ed8;
-  --nexa-secondary: #4338CA;
-  --nexa-secondary-soft: rgba(67, 56, 202, 0.08);
+  --nexa-primary: #3B82F6;
+  --nexa-primary-soft: rgba(59, 130, 246, 0.12);
+  --nexa-primary-hover: #2563EB;
+  --nexa-secondary: #6366F1;
+  --nexa-secondary-soft: rgba(99, 102, 241, 0.12);
   --nexa-accent: #14B8A6;
-  --nexa-accent-soft: rgba(20, 184, 166, 0.08);
+  --nexa-accent-soft: rgba(20, 184, 166, 0.12);
   --nexa-success: #10B981;
   --nexa-warning: #F59E0B;
   --nexa-error: #EF4444;
-  --nexa-surface: #F5F7FB;
+  --nexa-surface: #F8FAFC;
   --nexa-surface-soft: #FFFFFF;
   --nexa-surface-strong: #FFFFFF;
   --nexa-border: #E2E8F0;
@@ -40,21 +40,21 @@
   --nexa-shadow-card: 0 4px 20px rgba(15, 23, 42, 0.05);
   --nexa-shadow-surface: 0 2px 10px rgba(15, 23, 42, 0.04);
   --nexa-shadow-lg: 0 20px 60px rgba(15, 23, 42, 0.12);
-  --nexa-gradient-primary: linear-gradient(135deg, #2563EB, #4338CA);
-  --nexa-gradient-user: linear-gradient(135deg, #2563EB, #1D4ED8);
-  --nexa-gradient-header: linear-gradient(135deg, #1E293B, #0F172A);
+  --nexa-gradient-primary: linear-gradient(135deg, #3B82F6 0%, #6366F1 100%);
+  --nexa-gradient-user: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%);
+  --nexa-gradient-header: linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%);
 }
 
 .dark {
-  --nexa-surface: #0f172a;
-  --nexa-surface-soft: #111827;
-  --nexa-surface-strong: #111827;
-  --nexa-border: rgba(148, 163, 184, 0.12);
-  --nexa-text: #e2e8f0;
-  --nexa-muted: #94a3b8;
-  --nexa-shadow-card: 0 18px 60px rgba(15, 23, 42, 0.45);
-  --nexa-shadow-surface: 0 10px 30px rgba(15, 23, 42, 0.35);
-  --nexa-shadow-lg: 0 25px 80px rgba(15, 23, 42, 0.5);
+  --nexa-surface: #090D16;
+  --nexa-surface-soft: #0E1526;
+  --nexa-surface-strong: #131B2E;
+  --nexa-border: rgba(148, 163, 184, 0.14);
+  --nexa-text: #F1F5F9;
+  --nexa-muted: #94A3B8;
+  --nexa-shadow-card: 0 20px 60px rgba(0, 0, 0, 0.6);
+  --nexa-shadow-surface: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --nexa-shadow-lg: 0 30px 90px rgba(0, 0, 0, 0.75);
 }
 
 html, body {
@@ -232,6 +232,43 @@ body {
   animation: pulse-ring 1.5s ease-in-out infinite;
 }
 
+@keyframes glow-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.nexa-glass-shell {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 20px 60px -15px rgba(15, 23, 42, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+}
+
+.dark .nexa-glass-shell {
+  background: rgba(9, 13, 22, 0.92);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  box-shadow: 0 25px 80px -20px rgba(0, 0, 0, 0.9), 0 0 45px -10px rgba(59, 130, 246, 0.15), 0 1px 0 0 rgba(255, 255, 255, 0.08) inset;
+}
+
+.nexa-edge-light {
+  position: relative;
+}
+
+.nexa-edge-light::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 5%;
+  right: 5%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.6) 50%, transparent 100%);
+  pointer-events: none;
+  z-index: 20;
+}
+
 .nexa-widget-container {
   background: var(--nexa-surface-strong);
   backdrop-filter: blur(20px);
@@ -243,25 +280,28 @@ body {
 }
 
 .nexa-user-message {
-  background: var(--nexa-gradient-user);
+  background: linear-gradient(135deg, #2563EB 0%, #4338CA 100%);
   color: white;
   border-radius: 18px 18px 4px 18px;
-  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.22), 0 1px 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 6px 20px -4px rgba(37, 99, 235, 0.35), 0 2px 6px rgba(0, 0, 0, 0.1);
   line-height: 1.65;
 }
 
 .nexa-bot-message {
-  background: var(--nexa-surface-soft);
-  border: 1px solid var(--nexa-border);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.9);
   border-radius: 18px 18px 18px 4px;
-  box-shadow: 0 2px 16px rgba(15, 23, 42, 0.07), 0 1px 4px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
   line-height: 1.65;
 }
 
 .dark .nexa-bot-message {
-  background: var(--nexa-surface-soft);
-  border-color: rgba(148, 163, 184, 0.14);
-  box-shadow: 0 2px 16px rgba(15, 23, 42, 0.25), 0 1px 4px rgba(15, 23, 42, 0.15);
+  background: rgba(14, 21, 38, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 18px 18px 18px 4px;
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
 }
 
 .nexa-tab-active {
@@ -473,22 +513,40 @@ body {
 
 .nexa-suggestion-chip {
   border-radius: 999px;
-  padding: 0.4rem 0.95rem;
-  font-size: 0.75rem;
+  padding: 0.45rem 1rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  border: 1px solid var(--nexa-border);
-  background: var(--nexa-surface-soft);
-  color: var(--nexa-muted);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: #FFFFFF;
+  color: #334155;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.dark .nexa-suggestion-chip {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: rgba(148, 163, 184, 0.16);
+  color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .nexa-suggestion-chip:hover {
-  border-color: var(--nexa-primary);
-  color: var(--nexa-primary);
-  background: rgba(37, 99, 235, 0.07);
-  transform: translateY(-1.5px) scale(1.03);
-  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.1);
+  border-color: rgba(59, 130, 246, 0.6);
+  color: #2563eb;
+  background: rgba(239, 246, 255, 0.9);
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.12);
+}
+
+.dark .nexa-suggestion-chip:hover {
+  border-color: rgba(96, 165, 250, 0.5);
+  color: #93c5fd;
+  background: rgba(30, 41, 59, 0.9);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 
 /* Modern invisible scroll behavior */

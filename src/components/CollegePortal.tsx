@@ -9,15 +9,19 @@ import {
   Calendar, Users, BookOpen, Clock, ShieldCheck, ArrowRight, Server, Globe
 } from 'lucide-react';
 import { Department, Faculty, PortalItem } from '../types';
+import { AttributionMark } from './attribution/AttributionMark';
+import { useAttribution } from './attribution/useAttribution';
 
 interface CollegePortalProps {
   departments: Department[];
   faculty: Faculty[];
   portalItems: PortalItem[];
+  onOpenAdmin?: () => void;
 }
 
-export default function CollegePortal({ departments, faculty, portalItems }: CollegePortalProps) {
+export default function CollegePortal({ departments, faculty, portalItems, onOpenAdmin }: CollegePortalProps) {
   const principal = faculty.find(f => typeof f.designation === 'string' && /Principal/i.test(f.designation));
+  const { attribution, isVerified } = useAttribution();
 
   return (
     <div className="w-full bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
@@ -295,13 +299,28 @@ export default function CollegePortal({ departments, faculty, portalItems }: Col
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto pt-6 flex flex-col sm:flex-row justify-between items-center text-slate-600 text-xs gap-4">
-          <p>© 2026 Narayana Engineering College, Nellore. All rights reserved.</p>
-          <div className="flex items-center gap-4 font-semibold text-slate-500">
-            <span className="font-mono text-[10px]">Version 1.0.0 (Rule-Based)</span>
+        <div className="max-w-7xl mx-auto pt-6 border-t border-slate-900/80 flex flex-col sm:flex-row justify-between items-center text-slate-500 text-xs gap-4">
+          <div>
+            <p>© 2026 Narayana Engineering College, Nellore. All rights reserved.</p>
+            {isVerified && (
+              <p className="text-[11px] text-slate-400 mt-1 font-medium flex items-center gap-1.5 flex-wrap">
+                <span>Crafted & Engineered by</span>
+                <AttributionMark variant="footer" />
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-3 font-semibold text-slate-400">
+            <span className="font-mono text-[10px] bg-slate-900 px-2.5 py-1 rounded border border-slate-800 text-slate-400">
+              {isVerified && attribution
+                ? `NEXA AI Engine • Developed by ${attribution.displayName || attribution.name} (${attribution.rollNo})`
+                : 'NEXA AI Engine • Narayana Engineering College, Nellore'}
+            </span>
           </div>
         </div>
       </footer>
+
+      {/* Floating Watermark Pill */}
+      <AttributionMark variant="floating" />
     </div>
   );
 }

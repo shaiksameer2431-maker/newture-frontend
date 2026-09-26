@@ -49,7 +49,10 @@ const TABLES = {
   STUDENTS: 'students'
 };
 
-const HEALTH_CHECK_TIMEOUT_MS = 60_000;
+const isLocalhost = typeof window !== 'undefined' && 
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+const HEALTH_CHECK_TIMEOUT_MS = isLocalhost ? 4_000 : 60_000;
 
 async function fetchWithTimeout(input: string, timeoutMs = HEALTH_CHECK_TIMEOUT_MS): Promise<Response> {
   const controller = new AbortController();
@@ -66,7 +69,7 @@ export async function checkConnection(onProgress?: (message: string) => void): P
   const maxAttempts = 3;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     if (attempt > 1 && onProgress) {
-      onProgress(`Waking backend server (cold-start attempt ${attempt}/${maxAttempts})...`);
+      onProgress(`Connecting to local backend (attempt ${attempt}/${maxAttempts})...`);
     }
     try {
       const res = await fetchWithTimeout('/api/health');
@@ -76,20 +79,24 @@ export async function checkConnection(onProgress?: (message: string) => void): P
           return true;
         }
       }
-      // Fallback probe to root endpoint
-      const rootRes = await fetchWithTimeout('/');
-      if (rootRes.ok) {
-        const rootData = await rootRes.json().catch(() => null);
-        if (rootData && (rootData.status === 'online' || rootData.database)) {
-          return true;
-        }
-      }
     } catch (error) {
       console.warn(`Connection check attempt ${attempt}/${maxAttempts} failed or timed out:`, error);
+      // Try direct IPv4 fallback
+      try {
+        const altRes = await fetch('http://127.0.0.1:3000/api/health', { signal: AbortSignal.timeout(3000) });
+        if (altRes.ok) {
+          const altData = await altRes.json().catch(() => null);
+          if (altData && (altData.status === 'ok' || altData.status === 'degraded' || altData.status === 'online')) {
+            return true;
+          }
+        }
+      } catch {
+        /* ignore */
+      }
     }
 
     if (attempt < maxAttempts) {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
   return false;
@@ -307,15 +314,28 @@ export async function deleteCategory(catId: string) {
 }
 
 export async function saveChatLog(log: ChatLog) {
-  // Chat persistence has been disabled per configuration (session-only chat behavior).
-  // This function intentionally no-ops to prevent saving conversation history to the server.
-  console.warn('[CHAT LOGGING] saveChatLog is disabled by configuration. Chat logs will not be persisted.');
-  return Promise.resolve();
+  try {
+    try {
+      const existingStr = localStorage.getItem('college_chat_logs');
+      const existing: ChatLog[] = existingStr ? JSON.parse(existingStr) : [];
+      const updated = [log, ...existing].slice(0, 200);
+      localStorage.setItem('college_chat_logs', JSON.stringify(updated));
+    } catch {
+      /* ignore */
+    }
+
+    await apiWrite('POST', '/api/admin/chat-logs', log);
+  } catch (error) {
+    console.warn('[CHAT LOGGING] Failed to persist chat log to backend:', error);
+  }
 }
 
 export async function clearChatLogs() {
-  // Disabled — no-op to avoid accidental deletion of server-side chat logs. Frontend chat history is session-only.
-  console.warn('[CHAT LOGGING] clearChatLogs is disabled by configuration.');
+  try {
+    await apiFetch('/api/admin/chat-logs', { method: 'DELETE' });
+  } catch (err) {
+    console.warn('[CHAT LOGGING] Failed to clear chat logs from server:', err);
+  }
   return Promise.resolve();
 }
 

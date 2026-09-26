@@ -118,28 +118,9 @@ export default function TicketManager({ onStateChanged }: TicketManagerProps) {
     }
   };
 
-  // Fetch data
-  const fetchChatLogs = async () => {
-    try {
-      // Read logs from local or backend
-      let logsData: ChatLog[] = [];
-      try {
-        const localLogs = localStorage.getItem('college_chat_logs');
-        if (localLogs) {
-          logsData = JSON.parse(localLogs);
-        }
-      } catch (e) {
-        console.error("Failed to load local chat logs", e);
-      }
-      setChatLogs(logsData);
-    } catch (err: any) {
-      console.error("Failed to load Analytics:", err);
-    }
-  };
-
   useEffect(() => {
     // Subscribe to tickets
-    const unsub = subscribeToCollection<SupportTicket>('supportTickets', (data) => {
+    const unsubTickets = subscribeToCollection<SupportTicket>('supportTickets', (data) => {
       // Map snake_case to camelCase
       const mappedTickets = data.map((t: any) => ({
         id: t.id,
@@ -163,10 +144,27 @@ export default function TicketManager({ onStateChanged }: TicketManagerProps) {
       setLoading(false);
     });
 
-    fetchChatLogs();
+    // Subscribe to chat logs from backend
+    const unsubLogs = subscribeToCollection<ChatLog>('chatLogs', (data) => {
+      if (Array.isArray(data) && data.length > 0) {
+        setChatLogs(data);
+      } else {
+        try {
+          const localLogs = localStorage.getItem('college_chat_logs');
+          if (localLogs) {
+            setChatLogs(JSON.parse(localLogs));
+          } else {
+            setChatLogs([]);
+          }
+        } catch {
+          setChatLogs([]);
+        }
+      }
+    });
     
     return () => {
-      unsub();
+      unsubTickets();
+      unsubLogs();
     };
   }, []);
 
@@ -281,11 +279,19 @@ export default function TicketManager({ onStateChanged }: TicketManagerProps) {
       isOpen: true,
       title: '⚠️ Clear Chat Logs',
       message: 'Are you sure you want to clear all local chat statistics and history logs? This action is irreversible.',
-      onConfirm: () => {
-        localStorage.removeItem('college_chat_logs');
-        setChatLogs([]);
-        if (onStateChanged) onStateChanged();
-        showToast("Local chat logs cleared successfully.", "success");
+      onConfirm: async () => {
+        try {
+          await apiFetch('/api/admin/chat-logs', { method: 'DELETE' });
+          localStorage.removeItem('college_chat_logs');
+          setChatLogs([]);
+          if (onStateChanged) onStateChanged();
+          showToast("Chat logs cleared successfully.", "success");
+        } catch (err: any) {
+          localStorage.removeItem('college_chat_logs');
+          setChatLogs([]);
+          if (onStateChanged) onStateChanged();
+          showToast("Chat logs cleared locally.", "success");
+        }
       }
     });
   };

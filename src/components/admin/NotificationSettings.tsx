@@ -86,7 +86,7 @@ export default function NotificationSettings() {
   };
 
   return (
-    <section className="mx-auto max-w-2xl space-y-5" aria-labelledby="notification-settings-title">
+    <section className="w-full space-y-5" aria-labelledby="notification-settings-title">
       <header className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-start gap-3">
           <span className="rounded-xl bg-blue-500/10 p-2.5 text-blue-600 dark:text-blue-300">
@@ -205,7 +205,11 @@ export default function NotificationSettings() {
                 try {
                   const response = await apiFetch('/api/admin/settings/test-gmail', { 
                     method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' } 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      gmailEmail: settings.gmailEmail,
+                      gmailAppPassword: settings.gmailAppPassword || undefined
+                    })
                   });
                   const data = await response.json();
                   if (!response.ok || !data.success) {

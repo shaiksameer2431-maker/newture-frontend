@@ -275,8 +275,14 @@ export default function App() {
               NARAYANA NEXA — ADMIN COMMAND CENTRE
             </span>
             <span className="text-slate-500 hidden md:inline">|</span>
-            <span className="text-slate-400 hidden md:inline font-medium">Private Database Sync Mode</span>
+            <span className="text-slate-400 hidden md:inline font-medium">Database Sync Mode</span>
           </div>
+          <button
+            onClick={() => setViewMode('portal')}
+            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+          >
+            ← Back to Portal
+          </button>
         </div>
       )}
 
@@ -289,6 +295,7 @@ export default function App() {
               departments={departments} 
               faculty={faculty} 
               portalItems={portalItems}
+              onOpenAdmin={() => setViewMode('admin')}
             />
             {/* Floating widget mapped to synchronized db rules */}
             <ChatbotWidget 
@@ -323,6 +330,9 @@ export default function App() {
             onResetAll={handleResetAll}
             typingSpeed={typingSpeed}
             setTypingSpeed={setTypingSpeed}
+            onLogout={() => {
+              setViewMode('portal');
+            }}
           />
         )}
       </main>
